@@ -1,0 +1,71 @@
+name: Model Quality Gate
+
+on:
+  workflow_run:
+    workflows: [ "CI - Model Testing & Validation" ]
+    types: [ completed ]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Download model from Kaggle
+        run: |
+          pip install kaggle
+          mkdir -p ~/.kaggle
+          echo "{\"username\":\"${{ secrets.KAGGLE_USERNAME }}\",\"key\":\"${{ secrets.KAGGLE_KEY }}\"}" > ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
+          kaggle datasets download kaffailevi/license-plate-models -p models/ --unzip
+
+      - name: Quality Gate Check
+        run: |
+          python -c "
+          import torch
+          import json
+          
+          # Modell minőség ellenőrzés
+          try:
+              detector = torch.load('models/detector.pt')
+              ocr = torch.load('models/ocr.pt')
+              
+              # Alapvető modell checkpoint
+              assert detector is not None, 'Detector model is None'
+              assert ocr is not None, 'OCR model is None'
+              
+              print('✅ Modell fájlok OK')
+              print('✅ Quality gate PASSED')
+              
+          except Exception as e:
+              print(f'❌ Quality gate FAILED: {e}')
+              exit(1)
+          "
+
+      - name: Create deployment artifact
+        if: success()
+        run: |
+          mkdir -p artifacts
+          cp -r models/ artifacts/
+          cp src/inference.py artifacts/
+          echo "Deployment ready at: artifacts/"
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: model-package
+          path: artifacts/
+          retention-days: 30

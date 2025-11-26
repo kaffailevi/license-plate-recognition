@@ -1,0 +1,41 @@
+# Models (Kaggle-ből húzzuk le)
+models/*.pt
+models/*.pth
+models/*.onnx
+
+# Kaggle artifacts
+/kaggle/
+*.ipynb_checkpoints/
+
+# Data
+data/
+/images/
+/datasets/
+
+# Cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets
+.kaggle/
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI artifacts
+artifacts/
+.coverage.*
+htmlcov/
