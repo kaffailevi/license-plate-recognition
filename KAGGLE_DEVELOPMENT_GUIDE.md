@@ -297,9 +297,11 @@ Update `src/train.py` to load your actual dataset:
 
 ```python
 # Replace dummy data loaders with real ones
+import os
+import json
+import torchvision.transforms
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
-import json
 
 class LicensePlateDataset(Dataset):
     def __init__(self, image_dir, annotation_file):
