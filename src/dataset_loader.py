@@ -35,7 +35,7 @@ class DatasetLoader:
         if not KAGGLEHUB_AVAILABLE:
             raise ImportError("kagglehub is required. Install with: pip install kagglehub")
     
-    def load_car_plate_detection_dataset(self, file_path: str = "") -> Optional[Any]:
+    def load_car_plate_detection_dataset(self, file_path: str = "") -> Any:
         """
         Load the andrewmvd/car-plate-detection dataset from Kaggle
         
@@ -51,22 +51,29 @@ class DatasetLoader:
         try:
             if PANDAS_AVAILABLE and file_path:
                 # Load as pandas DataFrame if file_path is provided
-                df = kagglehub.load_dataset(
-                    KaggleDatasetAdapter.PANDAS,
-                    "andrewmvd/car-plate-detection",
-                    file_path
-                )
-                logger.info(f"✅ Dataset loaded successfully. Shape: {df.shape}")
-                logger.info(f"First 5 records:\n{df.head()}")
-                return df
+                try:
+                    df = kagglehub.load_dataset(
+                        KaggleDatasetAdapter.PANDAS,
+                        "andrewmvd/car-plate-detection",
+                        file_path
+                    )
+                    logger.info(f"✅ Dataset loaded successfully. Shape: {df.shape}")
+                    logger.info(f"First 5 records:\n{df.head()}")
+                    return df
+                except FileNotFoundError as e:
+                    logger.error(f"❌ File not found in dataset: {file_path}")
+                    raise FileNotFoundError(f"File '{file_path}' not found in dataset") from e
             else:
                 # Download the dataset and return path
                 path = kagglehub.dataset_download("andrewmvd/car-plate-detection")
                 logger.info(f"✅ Dataset downloaded to: {path}")
                 return path
                 
-        except Exception as e:
+        except (ImportError, ConnectionError) as e:
             logger.error(f"❌ Failed to load dataset: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"❌ Unexpected error loading dataset: {e}")
             raise
     
     def get_dataset_info(self, dataset_path: str) -> Dict[str, Any]:
@@ -124,7 +131,7 @@ class DatasetLoader:
         logger.info(f"Dataset structure for: {dataset_path}")
         
         def print_tree(dir_path: Path, prefix: str = "", depth: int = 0):
-            if depth > max_depth:
+            if depth >= max_depth:
                 return
             
             try:

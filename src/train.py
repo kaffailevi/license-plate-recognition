@@ -33,8 +33,11 @@ if USE_KAGGLE_DATASET and DATASET_LOADER_AVAILABLE:
     try:
         logger.info("Loading dataset from Kaggle using kagglehub...")
         KAGGLE_DATA_PATH = load_dataset_for_training(use_kaggle_dataset=True)
+    except (ImportError, ConnectionError) as e:
+        logger.warning(f"Failed to load Kaggle dataset (import/connection error): {e}. Using default path.")
+        KAGGLE_DATA_PATH = os.environ.get("KAGGLE_DATA_PATH", "./data")
     except Exception as e:
-        logger.warning(f"Failed to load Kaggle dataset: {e}. Using default path.")
+        logger.warning(f"Unexpected error loading Kaggle dataset: {e}. Using default path.")
         KAGGLE_DATA_PATH = os.environ.get("KAGGLE_DATA_PATH", "./data")
 else:
     KAGGLE_DATA_PATH = os.environ.get("KAGGLE_DATA_PATH", "./data")
