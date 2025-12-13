@@ -96,6 +96,10 @@ def _register_safe_globals():
     _SAFE_GLOBALS_READY = True
 
 
+# Ensure safe globals are registered at import time for any torch.load calls
+_register_safe_globals()
+
+
 def ensure_dummy_assets_ready():
     """Create lightweight placeholder models if expected assets are missing."""
     global _ASSETS_READY
@@ -142,8 +146,8 @@ class LicensePlateRecognizer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         try:
-            self.detector = torch.load(detector_path, map_location=self.device)
-            self.ocr = torch.load(ocr_path, map_location=self.device)
+            self.detector = torch.load(detector_path, map_location=self.device, weights_only=False)
+            self.ocr = torch.load(ocr_path, map_location=self.device, weights_only=False)
             self.detector.eval()
             self.ocr.eval()
             logger.info(f"✅ Models loaded on {self.device}")
