@@ -164,7 +164,143 @@ To enable CI/CD integration:
 
 ## Dataset Preparation
 
-### 1. Dataset Structure
+You have two options for dataset preparation: use an existing Kaggle dataset (recommended for beginners) or upload your own.
+
+### Option 1: Use Existing Kaggle Dataset (Recommended)
+
+If you want to use an existing dataset from Kaggle:
+
+#### Method A: Using kagglehub (Easiest)
+
+This project now includes built-in support for the `andrewmvd/car-plate-detection` dataset using `kagglehub`.
+
+**Installation:**
+```bash
+pip install kagglehub pandas
+```
+
+**Usage in Python:**
+```python
+import kagglehub
+from kagglehub import KaggleDatasetAdapter
+
+# Load the dataset
+dataset_path = kagglehub.dataset_download("andrewmvd/car-plate-detection")
+print(f"Dataset downloaded to: {dataset_path}")
+
+# Or load a specific file as pandas DataFrame
+file_path = "annotations.csv"  # adjust based on dataset structure
+df = kagglehub.load_dataset(
+    KaggleDatasetAdapter.PANDAS,
+    "andrewmvd/car-plate-detection",
+    file_path
+)
+print("First 5 records:", df.head())
+```
+
+**Using the built-in dataset loader:**
+
+This project includes a `dataset_loader.py` module:
+
+```python
+from src.dataset_loader import DatasetLoader
+
+# Initialize loader
+loader = DatasetLoader()
+
+# Load the car plate detection dataset
+dataset_path = loader.load_car_plate_detection_dataset()
+
+# Get dataset info
+info = loader.get_dataset_info(dataset_path)
+print(f"Files: {len(info['files'])}")
+print(f"Subdirs: {info['subdirs']}")
+
+# Show structure
+loader.list_dataset_structure(dataset_path)
+```
+
+**Integration with training:**
+
+Set environment variable to use Kaggle dataset:
+```bash
+export USE_KAGGLE_DATASET=true
+python src/train.py
+```
+
+The training script will automatically download and use the `andrewmvd/car-plate-detection` dataset.
+
+---
+
+#### Method B: Manual Integration (Alternative)
+
+#### 1. Browse Available Datasets
+
+1. Go to [kaggle.com/datasets](https://www.kaggle.com/datasets)
+2. Search for license plate datasets:
+   - Search terms: "license plate", "car plate", "number plate", "ALPR", "ANPR"
+   - Popular examples:
+     - `andrewmvd/car-plate-detection`
+     - `aslanahmedov/number-plate-detection`
+     - Or any other license plate recognition dataset
+
+3. Review the dataset:
+   - Check the file structure
+   - Read the description
+   - Note the dataset path (e.g., `username/dataset-name`)
+
+#### 2. Note Dataset Path and Structure
+
+After selecting a dataset, note:
+- **Dataset path**: `username/dataset-name` (you'll need this for your notebook)
+- **File structure**: Understand where images and annotations are located
+- **Format**: Check if annotations are in JSON, XML, CSV, or other formats
+
+Example: If using `andrewmvd/car-plate-detection`:
+```
+Dataset path: andrewmvd/car-plate-detection
+Location in Kaggle: /kaggle/input/car-plate-detection/
+```
+
+#### 3. Adapt Training Code
+
+You'll need to adapt your data loading code to match the dataset's structure. Common structures:
+
+**Structure A: Separate folders**
+```
+/kaggle/input/dataset-name/
+├── images/
+│   ├── img1.jpg
+│   └── img2.jpg
+└── annotations/
+    ├── img1.xml
+    └── img2.xml
+```
+
+**Structure B: Single folder with annotations**
+```
+/kaggle/input/dataset-name/
+├── train/
+│   ├── img1.jpg
+│   ├── img1.xml
+│   └── ...
+└── test/
+```
+
+**Structure C: CSV annotations**
+```
+/kaggle/input/dataset-name/
+├── images/
+└── annotations.csv
+```
+
+---
+
+### Option 2: Upload Your Own Dataset
+
+If you have your own dataset, follow these steps:
+
+#### 1. Dataset Structure
 
 Organize your license plate dataset as follows:
 
@@ -183,7 +319,7 @@ license-plate-dataset/
     └── val.json
 ```
 
-### 2. Annotation Format
+#### 2. Annotation Format
 
 **For Detector (Bounding Boxes):**
 ```json
@@ -204,9 +340,9 @@ license-plate-dataset/
 }
 ```
 
-### 3. Upload Dataset to Kaggle
+#### 3. Upload Dataset to Kaggle
 
-#### Option A: Via Web Interface
+**Via Web Interface:**
 
 1. Go to [kaggle.com/datasets](https://www.kaggle.com/datasets)
 2. Click **New Dataset**
@@ -214,7 +350,7 @@ license-plate-dataset/
 4. Set visibility (Private/Public)
 5. Click **Create**
 
-#### Option B: Via CLI
+**Via CLI:**
 
 ```bash
 # Create dataset metadata
@@ -230,7 +366,7 @@ EOF
 kaggle datasets create -p /path/to/license-plate-dataset
 ```
 
-### 4. Note Dataset Path
+#### 4. Note Dataset Path
 
 After upload, note your dataset path:
 ```
@@ -267,12 +403,20 @@ print(f"Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else
 ### 3. Add Dataset as Input
 
 1. In notebook, click **Add Data** (right sidebar)
-2. Search for your dataset: `YOUR_USERNAME/license-plate-dataset`
+2. Search for a dataset:
+   - **Existing dataset**: Search by name (e.g., `andrewmvd/car-plate-detection`)
+   - **Your own dataset**: Search `YOUR_USERNAME/license-plate-dataset`
 3. Click **Add**
 
 The dataset will be available at:
 ```python
+# For existing dataset (example)
+KAGGLE_DATA_PATH = "/kaggle/input/car-plate-detection"
+
+# For your own dataset
 KAGGLE_DATA_PATH = "/kaggle/input/license-plate-dataset"
+
+# The exact path depends on the dataset name - check the "Input" section in Kaggle notebook
 ```
 
 ### 4. Upload Training Script
@@ -293,7 +437,9 @@ Copy the contents of `src/train.py` directly into notebook cells.
 
 ### 5. Modify Training Script
 
-Update `src/train.py` to load your actual dataset:
+Update `src/train.py` to load your actual dataset. The code depends on the dataset structure:
+
+#### For JSON Annotations (Custom Dataset)
 
 ```python
 # Replace dummy data loaders with real ones
@@ -331,6 +477,74 @@ train_dataset = LicensePlateDataset(
 )
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 ```
+
+#### For Existing Kaggle Datasets
+
+First, explore the dataset structure in your notebook:
+
+```python
+import os
+
+# List files in the dataset
+print("Dataset contents:")
+for root, dirs, files in os.walk(KAGGLE_DATA_PATH):
+    level = root.replace(KAGGLE_DATA_PATH, '').count(os.sep)
+    indent = ' ' * 2 * level
+    print(f'{indent}{os.path.basename(root)}/')
+    subindent = ' ' * 2 * (level + 1)
+    for file in files[:5]:  # Show first 5 files
+        print(f'{subindent}{file}')
+    if len(files) > 5:
+        print(f'{subindent}... and {len(files) - 5} more files')
+```
+
+Then adapt your data loader based on the structure. Common patterns:
+
+**For CSV annotations:**
+```python
+import pandas as pd
+
+# Load annotations
+df = pd.read_csv(f"{KAGGLE_DATA_PATH}/annotations.csv")
+
+class LicensePlateDataset(Dataset):
+    def __init__(self, dataframe, img_dir):
+        self.df = dataframe
+        self.img_dir = img_dir
+    
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        img_path = os.path.join(self.img_dir, row['filename'])
+        image = Image.open(img_path).convert('RGB')
+        # ... process annotations from row
+        return torchvision.transforms.ToTensor()(image), row
+```
+
+**For XML annotations (Pascal VOC format):**
+```python
+import xml.etree.ElementTree as ET
+
+def parse_xml_annotation(xml_path):
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    
+    objects = []
+    for obj in root.findall('object'):
+        bbox = obj.find('bndbox')
+        objects.append({
+            'name': obj.find('name').text,
+            'xmin': int(bbox.find('xmin').text),
+            'ymin': int(bbox.find('ymin').text),
+            'xmax': int(bbox.find('xmax').text),
+            'ymax': int(bbox.find('ymax').text)
+        })
+    return objects
+```
+
+**Tip**: Check the dataset's description or example notebooks on Kaggle for the correct format.
 
 ### 6. Run Training
 
@@ -576,7 +790,37 @@ Quality gates:
 - **Model size**: Min 100KB for both models
 - **Metadata**: Valid JSON with required fields
 
-### 4. Probe Test (Quick Sanity Check)
+### 4. Dataset Loader Tests
+
+**Test dataset loading functionality:**
+
+```bash
+# Run dataset loader tests (skip integration tests)
+pytest tests/test_dataset_loader.py -v -m "not integration"
+
+# Run integration tests (requires network and Kaggle authentication)
+pytest tests/test_dataset_loader.py -v -m "integration"
+```
+
+Tests validate:
+- DatasetLoader initialization
+- Dataset download and caching
+- Dataset info extraction
+- Directory structure listing
+- Integration with training pipeline
+
+**Test the dataset loader directly:**
+
+```bash
+python src/dataset_loader.py
+```
+
+This will:
+- Download the `andrewmvd/car-plate-detection` dataset
+- Display dataset structure
+- Show file counts and subdirectories
+
+### 5. Probe Test (Quick Sanity Check)
 
 ```bash
 python src/probe_test.py
@@ -588,7 +832,7 @@ Fast validation that models:
 - Produce expected output shapes
 - OCR decoding works
 
-### 5. Interpreting Test Results
+### 6. Interpreting Test Results
 
 **✅ All tests pass:**
 ```

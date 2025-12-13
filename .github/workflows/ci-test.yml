@@ -28,8 +28,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
-      - name: Install Kaggle CLI
-        run: pip install kaggle
+      - name: Install Kaggle CLI and kagglehub
+        run: |
+          pip install kaggle
+          pip install kagglehub pandas
 
       - name: Configure Kaggle API
         run: |
@@ -46,6 +48,11 @@ jobs:
       - name: Run unit tests
         run: |
           pytest tests/test_inference.py -v --cov=src --cov-report=xml
+
+      - name: Run dataset loader tests
+        run: |
+          pytest tests/test_dataset_loader.py -v -m "not integration"
+        continue-on-error: true
 
       - name: Run model quality regression test
         run: |
