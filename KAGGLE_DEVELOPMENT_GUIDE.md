@@ -100,6 +100,7 @@ venv\Scripts\activate  # Windows
 ### 3. Install Dependencies
 
 ```bash
+# From the repository root directory
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
@@ -135,7 +136,8 @@ chmod 600 ~/.kaggle/kaggle.json
 ### 3. Verify API Access
 
 ```bash
-kaggle datasets list --user yourusername
+# Replace YOUR_USERNAME with your actual Kaggle username
+kaggle datasets list --user YOUR_USERNAME
 ```
 
 If successful, you'll see your datasets listed.
@@ -153,8 +155,8 @@ To enable CI/CD integration:
 **Example `kaggle.json` structure:**
 ```json
 {
-  "username": "yourusername",
-  "key": "abc123def456..."
+  "username": "YOUR_USERNAME",
+  "key": "your_api_key_here"
 }
 ```
 
@@ -219,12 +221,12 @@ license-plate-dataset/
 cat > dataset-metadata.json << EOF
 {
   "title": "License Plate Dataset",
-  "id": "yourusername/license-plate-dataset",
+  "id": "YOUR_USERNAME/license-plate-dataset",
   "licenses": [{"name": "CC0-1.0"}]
 }
 EOF
 
-# Upload dataset
+# Upload dataset (replace with your actual dataset path)
 kaggle datasets create -p /path/to/license-plate-dataset
 ```
 
@@ -232,7 +234,7 @@ kaggle datasets create -p /path/to/license-plate-dataset
 
 After upload, note your dataset path:
 ```
-yourusername/license-plate-dataset
+YOUR_USERNAME/license-plate-dataset
 ```
 
 You'll use this in your Kaggle notebook.
@@ -265,7 +267,7 @@ print(f"Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else
 ### 3. Add Dataset as Input
 
 1. In notebook, click **Add Data** (right sidebar)
-2. Search for your dataset: `yourusername/license-plate-dataset`
+2. Search for your dataset: `YOUR_USERNAME/license-plate-dataset`
 3. Click **Add**
 
 The dataset will be available at:
@@ -410,7 +412,7 @@ print("✅ Models working!")
 
 Note your dataset path:
 ```
-yourusername/license-plate-models
+YOUR_USERNAME/license-plate-models
 ```
 
 ### 2. Update Model Version (Automated)
@@ -423,7 +425,7 @@ import json
 
 metadata = {
     "title": "License Plate Recognition Models",
-    "id": "yourusername/license-plate-models",
+    "id": "YOUR_USERNAME/license-plate-models",  # Replace YOUR_USERNAME
     "licenses": [{"name": "Apache 2.0"}]
 }
 
@@ -431,7 +433,8 @@ with open('/kaggle/working/dataset-metadata.json', 'w') as f:
     json.dump(metadata, f)
 
 # Version the dataset with Kaggle CLI
-version_message = input("Enter version message (e.g., 'v1.2 - Improved accuracy to 95%'): ")
+# Set your version message here
+version_message = "v1.2 - Improved accuracy to 95%"
 
 !kaggle datasets version -p /kaggle/working/models -m "{version_message}"
 ```
@@ -462,7 +465,8 @@ v2.0 - Complete architecture redesign
 ### 5. Verify Version
 
 ```bash
-kaggle datasets list-files yourusername/license-plate-models -v 2
+# Replace YOUR_USERNAME with your Kaggle username
+kaggle datasets list-files YOUR_USERNAME/license-plate-models -v 2
 ```
 
 ---
@@ -476,8 +480,8 @@ If your Kaggle dataset path differs from default, update `.github/workflows/ci-t
 ```yaml
 - name: Download latest model from Kaggle
   run: |
-    # Replace with your dataset path
-    kaggle datasets download yourusername/license-plate-models -p models/ --unzip
+    # Replace YOUR_USERNAME with your Kaggle username (e.g., kaffailevi)
+    kaggle datasets download YOUR_USERNAME/license-plate-models -p models/ --unzip
 ```
 
 ### 2. Trigger CI Pipeline
@@ -533,8 +537,8 @@ CI validates:
 Before versioning your model on Kaggle, test locally:
 
 ```bash
-# Download your model version
-kaggle datasets download yourusername/license-plate-models -p ./models --unzip
+# Download your model version (replace YOUR_USERNAME)
+kaggle datasets download YOUR_USERNAME/license-plate-models -p ./models --unzip
 
 # Run full test suite
 pytest tests/ -v
@@ -619,8 +623,8 @@ ls -l ~/.kaggle/kaggle.json
 # Verify permissions
 chmod 600 ~/.kaggle/kaggle.json
 
-# Test API
-kaggle datasets list -u yourusername
+# Test API (replace YOUR_USERNAME)
+kaggle datasets list -u YOUR_USERNAME
 ```
 
 ---
@@ -745,11 +749,11 @@ FileNotFoundError: models/detector.pt not found
 1. Verify Kaggle dataset is **Public** or secrets are configured
 2. Check dataset path in workflow:
    ```yaml
-   kaggle datasets download yourusername/license-plate-models
+   kaggle datasets download YOUR_USERNAME/license-plate-models
    ```
 3. Ensure models were uploaded to Kaggle dataset:
    ```bash
-   kaggle datasets list-files yourusername/license-plate-models
+   kaggle datasets list-files YOUR_USERNAME/license-plate-models
    ```
 
 ---
