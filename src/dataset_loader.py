@@ -131,7 +131,7 @@ class DatasetLoader:
         logger.info(f"Dataset structure for: {dataset_path}")
         
         def print_tree(dir_path: Path, prefix: str = "", depth: int = 0):
-            if depth >= max_depth:
+            if depth > max_depth:
                 return
             
             try:
