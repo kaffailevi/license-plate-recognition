@@ -692,9 +692,14 @@ Or use mixed precision training with `torch.cuda.amp`:
 ```python
 from torch.cuda.amp import autocast, GradScaler
 
+# Setup
+device = torch.device("cuda")
+model = model.cuda()
+model.train()
 scaler = GradScaler()
 
 for images, labels in train_loader:
+    images, labels = images.to(device), labels.to(device)
     optimizer.zero_grad()
     
     # Automatic mixed precision
@@ -880,7 +885,7 @@ FAILED test_inference_speed - Took 3.5s, max 2.0s
 
 ✅ **Do:**
 - Profile inference time regularly
-- Use mixed precision training with `torch.cuda.amp` for memory efficiency and speed
+- Use mixed precision training with `torch.cuda.amp` for memory efficiency and speed (may slightly reduce numerical precision)
 - Optimize model architecture iteratively
 - Cache models in production
 
