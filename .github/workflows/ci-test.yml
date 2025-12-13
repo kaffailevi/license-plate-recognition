@@ -41,10 +41,16 @@ jobs:
           chmod 600 ~/.kaggle/kaggle.json
 
       - name: Download latest model from Kaggle
+        if: ${{ secrets.KAGGLE_USERNAME != '' && secrets.KAGGLE_KEY != '' }}
         run: |
           # Kaggle dataset verziójának legújabbja automatikusan
           kaggle datasets download kaffailevi/license-plate-models -p models/ --unzip
         continue-on-error: true
+
+      - name: Skip Kaggle download (no secrets available)
+        if: ${{ secrets.KAGGLE_USERNAME == '' || secrets.KAGGLE_KEY == '' }}
+        run: |
+          echo "Kaggle secrets not available in this run; skipping dataset download."
 
       - name: Run unit tests
         run: |
