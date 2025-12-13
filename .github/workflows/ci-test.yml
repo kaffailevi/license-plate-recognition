@@ -12,6 +12,7 @@ on:
 jobs:
   test-and-validate:
     runs-on: ubuntu-latest
+    environment: license-plate-recognition-env
     
     steps:
       - name: Checkout repository
