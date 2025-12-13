@@ -35,8 +35,7 @@ class DatasetLoader:
         if not KAGGLEHUB_AVAILABLE:
             raise ImportError("kagglehub is required. Install with: pip install kagglehub")
     
-    @staticmethod
-    def load_car_plate_detection_dataset(file_path: str = "") -> Optional[Any]:
+    def load_car_plate_detection_dataset(self, file_path: str = "") -> Optional[Any]:
         """
         Load the andrewmvd/car-plate-detection dataset from Kaggle
         
@@ -46,8 +45,6 @@ class DatasetLoader:
         Returns:
             DataFrame if pandas is available, or dataset path
         """
-        if not KAGGLEHUB_AVAILABLE:
-            raise ImportError("kagglehub is required")
         
         logger.info("Loading andrewmvd/car-plate-detection dataset from Kaggle...")
         
@@ -72,8 +69,7 @@ class DatasetLoader:
             logger.error(f"❌ Failed to load dataset: {e}")
             raise
     
-    @staticmethod
-    def get_dataset_info(dataset_path: str) -> Dict[str, Any]:
+    def get_dataset_info(self, dataset_path: str) -> Dict[str, Any]:
         """
         Get information about downloaded dataset
         
@@ -111,8 +107,7 @@ class DatasetLoader:
         
         return info
     
-    @staticmethod
-    def list_dataset_structure(dataset_path: str, max_depth: int = 3):
+    def list_dataset_structure(self, dataset_path: str, max_depth: int = 3):
         """
         Print dataset directory structure
         
