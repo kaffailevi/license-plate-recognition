@@ -683,6 +683,26 @@ for i, (images, labels) in enumerate(train_loader):
         optimizer.zero_grad()
 ```
 
+Or use mixed precision training with `torch.cuda.amp`:
+
+```python
+from torch.cuda.amp import autocast, GradScaler
+
+scaler = GradScaler()
+
+for images, labels in train_loader:
+    optimizer.zero_grad()
+    
+    # Automatic mixed precision
+    with autocast():
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+    
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+```
+
 ---
 
 ### Issue: GitHub Secrets Not Working
@@ -856,7 +876,7 @@ FAILED test_inference_speed - Took 3.5s, max 2.0s
 
 ✅ **Do:**
 - Profile inference time regularly
-- Use mixed precision training (FP16)
+- Use mixed precision training with `torch.cuda.amp` for better stability
 - Optimize model architecture iteratively
 - Cache models in production
 
