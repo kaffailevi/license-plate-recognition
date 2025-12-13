@@ -13,6 +13,9 @@ jobs:
   test-and-validate:
     runs-on: ubuntu-latest
     environment: license-plate-recognition-env
+    env:
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
     
     steps:
       - name: Checkout repository
@@ -41,14 +44,14 @@ jobs:
           chmod 600 ~/.kaggle/kaggle.json
 
       - name: Download latest model from Kaggle
-        if: ${{ secrets.KAGGLE_USERNAME != '' && secrets.KAGGLE_KEY != '' }}
+        if: ${{ env.KAGGLE_USERNAME != '' && env.KAGGLE_KEY != '' }}
         run: |
           # Kaggle dataset verziójának legújabbja automatikusan
           kaggle datasets download kaffailevi/license-plate-models -p models/ --unzip
         continue-on-error: true
 
       - name: Skip Kaggle download (no secrets available)
-        if: ${{ secrets.KAGGLE_USERNAME == '' || secrets.KAGGLE_KEY == '' }}
+        if: ${{ env.KAGGLE_USERNAME == '' || env.KAGGLE_KEY == '' }}
         run: |
           echo "Kaggle secrets not available in this run; skipping dataset download."
 
