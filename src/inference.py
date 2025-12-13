@@ -27,6 +27,7 @@ PADDING_CHUNK_SIZE = 1024 * 1024
 DUMMY_ASSET_LOCK = Lock()
 MODEL_SIZE_BUFFER = 1
 _ASSETS_READY = False
+_SAFE_GLOBALS_READY = False
 
 
 class DummyDetectorModel(nn.Module):
@@ -86,6 +87,15 @@ def _ensure_dummy_assets():
         METADATA_PATH.write_text(json.dumps(metadata, indent=2))
 
 
+def _register_safe_globals():
+    """Register custom modules for torch.load safe loading."""
+    global _SAFE_GLOBALS_READY
+    if _SAFE_GLOBALS_READY:
+        return
+    torch.serialization.add_safe_globals([DummyDetectorModel, DummyOCRModel])
+    _SAFE_GLOBALS_READY = True
+
+
 def ensure_dummy_assets_ready():
     """Create lightweight placeholder models if expected assets are missing."""
     global _ASSETS_READY
@@ -128,6 +138,7 @@ class LicensePlateRecognizer:
     def __init__(self, detector_path: str = str(DETECTOR_PATH), 
                  ocr_path: str = str(OCR_PATH)):
         ensure_dummy_assets_ready()
+        _register_safe_globals()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         try:
