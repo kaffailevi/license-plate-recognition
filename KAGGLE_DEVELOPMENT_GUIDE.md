@@ -876,7 +876,7 @@ FAILED test_inference_speed - Took 3.5s, max 2.0s
 
 ✅ **Do:**
 - Profile inference time regularly
-- Use mixed precision training with `torch.cuda.amp` for better stability
+- Use mixed precision training with `torch.cuda.amp` for memory efficiency and speed
 - Optimize model architecture iteratively
 - Cache models in production
 
