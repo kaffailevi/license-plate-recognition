@@ -14,11 +14,31 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Import dataset loader if available
+try:
+    from dataset_loader import load_dataset_for_training, DatasetLoader
+    DATASET_LOADER_AVAILABLE = True
+except ImportError:
+    DATASET_LOADER_AVAILABLE = False
+    logger.warning("dataset_loader not available. Using default paths.")
+
 # Kaggle futtatáskor:
 # KAGGLE_DATA_PATH = "/kaggle/input/license-plate-dataset"
 # KAGGLE_OUTPUT_PATH = "/kaggle/working"
 
-KAGGLE_DATA_PATH = os.environ.get("KAGGLE_DATA_PATH", "./data")
+# Check if we should use Kaggle dataset
+USE_KAGGLE_DATASET = os.environ.get("USE_KAGGLE_DATASET", "false").lower() == "true"
+
+if USE_KAGGLE_DATASET and DATASET_LOADER_AVAILABLE:
+    try:
+        logger.info("Loading dataset from Kaggle using kagglehub...")
+        KAGGLE_DATA_PATH = load_dataset_for_training(use_kaggle_dataset=True)
+    except Exception as e:
+        logger.warning(f"Failed to load Kaggle dataset: {e}. Using default path.")
+        KAGGLE_DATA_PATH = os.environ.get("KAGGLE_DATA_PATH", "./data")
+else:
+    KAGGLE_DATA_PATH = os.environ.get("KAGGLE_DATA_PATH", "./data")
+
 KAGGLE_OUTPUT_PATH = os.environ.get("KAGGLE_OUTPUT_PATH", "./models")
 
 class LicensePlateDetector(torch.nn.Module):
@@ -125,7 +145,9 @@ def save_training_metadata():
         "cuda_available": torch.cuda.is_available(),
         "device": "cuda" if torch.cuda.is_available() else "cpu",
         "detector_model": "LicensePlateDetector-v1",
-        "ocr_model": "OCRModel-v1"
+        "ocr_model": "OCRModel-v1",
+        "dataset_source": "kaggle:andrewmvd/car-plate-detection" if USE_KAGGLE_DATASET else "local",
+        "dataset_path": KAGGLE_DATA_PATH
     }
     
     metadata_path = os.path.join(KAGGLE_OUTPUT_PATH, "training_metadata.json")

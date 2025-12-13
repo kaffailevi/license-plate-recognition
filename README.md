@@ -127,6 +127,8 @@ cat ~/.kaggle/kaggle.json
 
 ## 📚 Dokumentáció
 
+- [Kaggle Development Guide](KAGGLE_DEVELOPMENT_GUIDE.md) - Complete walkthrough for training on Kaggle
+- [Dataset Integration Guide](DATASET_INTEGRATION.md) - Using andrewmvd/car-plate-detection dataset
 - [Kaggle Notebook Guide](kaggle/README.md)
 - [Training Documentation](src/README.md)
 - [CI/CD Workflows](.github/workflows/README.md)

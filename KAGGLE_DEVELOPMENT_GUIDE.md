@@ -170,6 +170,70 @@ You have two options for dataset preparation: use an existing Kaggle dataset (re
 
 If you want to use an existing dataset from Kaggle:
 
+#### Method A: Using kagglehub (Easiest)
+
+This project now includes built-in support for the `andrewmvd/car-plate-detection` dataset using `kagglehub`.
+
+**Installation:**
+```bash
+pip install kagglehub pandas
+```
+
+**Usage in Python:**
+```python
+import kagglehub
+from kagglehub import KaggleDatasetAdapter
+
+# Load the dataset
+dataset_path = kagglehub.dataset_download("andrewmvd/car-plate-detection")
+print(f"Dataset downloaded to: {dataset_path}")
+
+# Or load a specific file as pandas DataFrame
+file_path = "annotations.csv"  # adjust based on dataset structure
+df = kagglehub.load_dataset(
+    KaggleDatasetAdapter.PANDAS,
+    "andrewmvd/car-plate-detection",
+    file_path
+)
+print("First 5 records:", df.head())
+```
+
+**Using the built-in dataset loader:**
+
+This project includes a `dataset_loader.py` module:
+
+```python
+from src.dataset_loader import DatasetLoader
+
+# Initialize loader
+loader = DatasetLoader()
+
+# Load the car plate detection dataset
+dataset_path = loader.load_car_plate_detection_dataset()
+
+# Get dataset info
+info = loader.get_dataset_info(dataset_path)
+print(f"Files: {len(info['files'])}")
+print(f"Subdirs: {info['subdirs']}")
+
+# Show structure
+loader.list_dataset_structure(dataset_path)
+```
+
+**Integration with training:**
+
+Set environment variable to use Kaggle dataset:
+```bash
+export USE_KAGGLE_DATASET=true
+python src/train.py
+```
+
+The training script will automatically download and use the `andrewmvd/car-plate-detection` dataset.
+
+---
+
+#### Method B: Manual Integration (Alternative)
+
 #### 1. Browse Available Datasets
 
 1. Go to [kaggle.com/datasets](https://www.kaggle.com/datasets)
@@ -726,7 +790,37 @@ Quality gates:
 - **Model size**: Min 100KB for both models
 - **Metadata**: Valid JSON with required fields
 
-### 4. Probe Test (Quick Sanity Check)
+### 4. Dataset Loader Tests
+
+**Test dataset loading functionality:**
+
+```bash
+# Run dataset loader tests (skip integration tests)
+pytest tests/test_dataset_loader.py -v -m "not integration"
+
+# Run integration tests (requires network and Kaggle authentication)
+pytest tests/test_dataset_loader.py -v -m "integration"
+```
+
+Tests validate:
+- DatasetLoader initialization
+- Dataset download and caching
+- Dataset info extraction
+- Directory structure listing
+- Integration with training pipeline
+
+**Test the dataset loader directly:**
+
+```bash
+python src/dataset_loader.py
+```
+
+This will:
+- Download the `andrewmvd/car-plate-detection` dataset
+- Display dataset structure
+- Show file counts and subdirectories
+
+### 5. Probe Test (Quick Sanity Check)
 
 ```bash
 python src/probe_test.py
@@ -738,7 +832,7 @@ Fast validation that models:
 - Produce expected output shapes
 - OCR decoding works
 
-### 5. Interpreting Test Results
+### 6. Interpreting Test Results
 
 **✅ All tests pass:**
 ```
