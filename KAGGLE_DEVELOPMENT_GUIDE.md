@@ -980,6 +980,6 @@ For issues or questions:
 
 ---
 
-**Last Updated**: December 2024  
+**Last Updated**: December 13, 2025  
 **Version**: 1.0  
 **Maintainer**: kaffailevi
