@@ -1,6 +1,25 @@
 import cv2
 import torch
 import numpy as np
+import torchvision.ops as ops
+
+def ensemble_detections(results, conf_thresh=0.7, iou_thresh=0.5):
+    boxes = []
+    scores = []
+
+    for _, output in results:
+        keep = output["scores"] >= conf_thresh
+        boxes.append(output["boxes"][keep])
+        scores.append(output["scores"][keep])
+
+    if not boxes or sum(b.shape[0] for b in boxes) == 0:
+        return None, None
+
+    boxes = torch.cat(boxes, dim=0)
+    scores = torch.cat(scores, dim=0)
+
+    keep_idx = ops.nms(boxes, scores, iou_thresh)
+    return boxes[keep_idx], scores[keep_idx]
 
 class InferenceEngine:
     def __init__(self, models):
@@ -22,3 +41,4 @@ class InferenceEngine:
                 results.append((name, output))
 
         return results
+
